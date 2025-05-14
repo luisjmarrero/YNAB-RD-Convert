@@ -21,7 +21,7 @@ def _handle_acc(input_file, output_dir):
             # Exclude the last 2 columns (balance)
             writer.writerow(row[:-2])
 
-        print(f"[txt] {input_file} -> {output_file}")
+        print(f"[bpd] {input_file} -> {output_file}")
 
 
 def _handle_tc(input_file, output_dir):
@@ -44,7 +44,7 @@ def _handle_tc(input_file, output_dir):
             row = [field.strip().strip('"') for field in line.split(',')]
             writer.writerow(row)
 
-        print(f"[txt] {input_file} -> {output_file}")
+        print(f"[bpd] {input_file} -> {output_file}")
 
 
 def convert_bpd_file_to_csv(input_file, output_dir):
@@ -56,9 +56,9 @@ def convert_bpd_file_to_csv(input_file, output_dir):
         elif 'tc' in base_name:
             _handle_tc(input_file, output_dir)
         else:
-            print(f"[txt] Skipped unknown format: {input_file}")
+            print(f"[bpd] Skipped unknown format: {input_file}")
             return
 
-        print(f"[txt] {input_file} → {os.path.join(output_dir, f'{base_name}.csv')}")
+        print(f"[bpd] {input_file} → {os.path.join(output_dir, f'{base_name}.csv')}")
     except Exception as e:
-        print(f"[txt] Error converting {input_file}: {e}")
+        print(f"Popular Error converting {input_file}: {e}")
