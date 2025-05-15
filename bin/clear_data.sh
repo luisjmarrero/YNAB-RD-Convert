@@ -1,3 +1,3 @@
 #!/bin/bash
-rm -rf ./result/*
-echo "All files in the result folder have been deleted."
+rm -rf ./data/*
+echo "All files in the data folder have been deleted."

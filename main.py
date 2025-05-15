@@ -1,6 +1,7 @@
 import os
 from converters.banco_popular_dom_converter import convert_bpd_file_to_csv
 from converters.bhd_converter import convert_bhd_file_to_csv
+from converters.ynab_converter import ensure_ynab_dir, convert_to_ynab_format
 
 SOURCE_DIR = 'data'
 RESULT_DIR = 'result'
@@ -32,8 +33,6 @@ def process_files():
             if name.startswith('bpd'):
                 print(f"[bpd] Processing file: {file_path}")
                 convert_bpd_file_to_csv(file_path, RESULT_DIR)
-            # elif name.startswith('bhd'):
-            #     convert_excel_to_csv(file_path, RESULT_DIR)
             else:
                 print(f"[skip txt] Unsupported file prefix: {filename}")
 
@@ -46,8 +45,14 @@ def process_files():
         else:
             print(f"[skip] Unsupported file type: {filename}")
 
+def run_ynab_converter():
+    print("[ynab] Starting YNAB conversion...")
+    ensure_ynab_dir()
+    convert_to_ynab_format()
+    print("[ynab] YNAB conversion completed.")
 
 if __name__ == '__main__':
     ensure_result_dir()
     clear_result_dir()
     process_files()
+    run_ynab_converter()
