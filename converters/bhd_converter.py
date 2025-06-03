@@ -17,7 +17,7 @@ def _handle_acc(input_file, output_dir):
     with pdfplumber.open(input_file) as pdf, open(output_file, 'w', newline='') as csv_file:
         writer = csv.writer(csv_file)
         writer.writerow(headers)  # Write the CSV headers
-
+        print(f"[pdf] Processing {input_file}...")
         for page in pdf.pages:
             tables = page.extract_tables()  # Extract tables from the page
             for table in tables:
@@ -32,9 +32,9 @@ def _handle_acc(input_file, output_dir):
                     # Handle None values and clean up the row
                     row = [cell.strip() if cell else "" for cell in row]
 
-                    # Remove "RD" prefix and format numbers
-                    outflow = row[3].replace("RD", "").replace(",", "").strip()
-                    inflow = row[4].replace("RD", "").replace(",", "").strip()
+                    # Remove "RD" or "US" prefix and format numbers
+                    outflow = row[3].replace("US", "").replace("RD", "").replace(",", "").strip()
+                    inflow = row[4].replace("US", "").replace("RD", "").replace(",", "").strip()
 
                     # Map the table row to the desired CSV format
                     date, reference, memo = row[:3]
