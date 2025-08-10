@@ -1,10 +1,29 @@
 import os
-from converters.banco_popular_dom_converter import convert_bpd_file_to_csv
-from converters.bhd_converter import convert_bhd_file_to_csv
-from converters.ynab_converter import ensure_ynab_dir, convert_to_ynab_format
+import logging
+import colorlog
+from converters.bpd_converter import BPDFileProcessor
+from converters.bhd_converter import BHDFileProcessor
+from converters.ynab_converter import YNABFileProcessor
 
 SOURCE_DIR = 'data'
 RESULT_DIR = 'result'
+
+# Configure logging
+handler = colorlog.StreamHandler()
+handler.setFormatter(colorlog.ColoredFormatter(
+    '%(log_color)s[%(levelname)s]%(reset)s %(message)s',
+    log_colors={
+        'DEBUG':    'cyan',
+        'INFO':     'green',
+        'WARNING':  'yellow',
+        'ERROR':    'red',
+        'CRITICAL': 'red,bg_white',
+    }
+))
+
+logger = logging.getLogger()
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 
 def ensure_result_dir():
@@ -18,7 +37,7 @@ def clear_result_dir():
             file_path = os.path.join(RESULT_DIR, filename)
             if os.path.isfile(file_path):
                 os.remove(file_path)
-        print(f"[cleanup] Cleared all files in '{RESULT_DIR}'")
+        logger.info(f"Cleared all files in '{RESULT_DIR}'")
 
 
 def process_files():
@@ -31,28 +50,33 @@ def process_files():
 
         if ext == '.txt':
             if name.startswith('bpd'):
-                print(f"[bpd] Processing file: {file_path}")
-                convert_bpd_file_to_csv(file_path, RESULT_DIR)
+                logger.info(f"[bpd] Processing file: {file_path}")
+                BPDFileProcessor.convert_file(file_path, RESULT_DIR)
             else:
-                print(f"[skip txt] Unsupported file prefix: {filename}")
+                logger.warning(f"[skip txt] Unsupported file prefix: {filename}")
 
         elif ext == '.pdf':
             if name.startswith('bhd'):
-                print(f"[bhd] Processing file: {file_path}")
-                convert_bhd_file_to_csv(file_path, RESULT_DIR)
+                logger.info(f"[bhd] Processing file: {file_path}")
+                BHDFileProcessor.convert_file(file_path, RESULT_DIR)
             else:
-                print(f"[skip bhd] Unsupported file prefix: {filename}")
+                logger.warning(f"[skip bhd] Unsupported file prefix: {filename}")
         else:
-            print(f"[skip] Unsupported file type: {filename}")
+            logger.warning(f"[skip] Unsupported file type: {filename}")
+
 
 def run_ynab_converter():
-    print("[ynab] Starting YNAB conversion...")
-    ensure_ynab_dir()
-    convert_to_ynab_format()
-    print("[ynab] YNAB conversion completed.")
+    logger.info("[ynab] Starting YNAB conversion...")
+    YNABFileProcessor.detect_and_convert_all(RESULT_DIR, os.path.join(RESULT_DIR, 'ynab'))
+    logger.info("[ynab] YNAB conversion completed.")
 
-if __name__ == '__main__':
+
+def run_all():
     ensure_result_dir()
     clear_result_dir()
     process_files()
     run_ynab_converter()
+
+
+if __name__ == '__main__':
+    run_all()
