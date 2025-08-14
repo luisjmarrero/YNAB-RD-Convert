@@ -17,22 +17,41 @@ Convert your bank transaction files into **YNAB-compatible CSVs** effortlessly. 
   - Maps transaction types (DB/CR) correctly, adds current year to dates, and formats numbers.
 
 
----
 
-## Installation
+## CLI Usage
 
-1. Clone the repo:  
-   ```bash
-   git clone https://github.com/yourusername/ynab-rd-convert-tool.git
-   cd ynab-rd-convert-tool
-   ```
+After installation, use the CLI tool to convert your bank files:
 
-2. (Optional) Create and activate a virtual environment:  
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Linux/macOS
-   venv\Scripts\activate     # Windows
-   ```
+### Basic usage
+
+```bash
+ynab-convert-rd
+```
+
+This will process all supported files in the default `data/` folder and output results to the `result/` folder.
+
+### Specify source and result folders
+
+```bash
+ynab-convert-rd --source path/to/source --result path/to/result
+```
+
+#### Options
+
+- `--source`, `-s`: Path to the folder containing your bank files. Default: `data/`
+- `--result`, `-r`: Path to the folder where converted files will be saved. Default: `result/`
+
+### Example
+
+```bash
+ynab-convert-rd --source data --result result
+```
+
+### Run directly with Python
+
+```bash
+python main.py --source data --result result
+```
 
 3. Install dependencies:  
    ```bash
@@ -61,8 +80,6 @@ Convert your bank transaction files into **YNAB-compatible CSVs** effortlessly. 
 
 ## Managing Output Data
 
-- The `result/` folder is **automatically cleared** each time you run the script to avoid mixing old and new data.
-
 - If you want to clear it manually, use the helper scripts:  
   ```bash
   ./bin/clear_result.sh
@@ -74,12 +91,25 @@ Convert your bank transaction files into **YNAB-compatible CSVs** effortlessly. 
 
 ---
 
-## Contributing
+## Installation
 
-Feel free to submit issues or PRs for new bank formats or improvements.
+### Prerequisites
 
----
+- Python 3.7 or newer
+- (Recommended) Use a virtual environment
 
-## License
+### Steps
 
-MIT License — do whatever you want, just don’t blame me.
+1. Clone the repository:
+2. (Optional) Create and activate a virtual environment:
+  ```bash
+  python -m venv venv
+  source venv/bin/activate  # macOS/Linux
+  venv\Scripts\activate     # Windows
+  ```
+3. Install the CLI tool:
+  ```bash
+  pip install .
+  ```
+
+After installation, the command `ynab-convert-rd` will be available globally.

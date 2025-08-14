@@ -24,3 +24,5 @@ venv.bak/
 
 .DS_Store
 .vscode/
+build/
+ynab_convert_rd.egg-info/
