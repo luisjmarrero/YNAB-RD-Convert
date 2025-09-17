@@ -31,8 +31,21 @@ class BaseYNABConverter:
             writer.writeheader()
 
             for row in reader:
+                # Defensive: skip rows that are not dicts or are empty
+                if not isinstance(row, dict) or not row:
+                    continue
+                # Defensive: skip rows where all values are None or empty
+                if all((v is None or v == '') for v in row.values()):
+                    continue
                 ynab_row = {col: '' for col in self.COLUMNS_TO_GRAB}
-                ynab_row.update(self.map_row(row))
+                try:
+                    mapped = self.map_row(row)
+                except Exception as e:
+                    logger.warning(f"[ynab_converter] Skipping malformed row: {row} ({e})")
+                    continue
+                if not isinstance(mapped, dict):
+                    continue
+                ynab_row.update(mapped)
                 writer.writerow(ynab_row)
 
         logger.info(f"[ynab_converter] {self.input_file} → {self.output_file}")
@@ -51,20 +64,33 @@ class BHDYNABConverter(BaseYNABConverter):
 
 class BPDAccYNABConverter(BaseYNABConverter):
     def map_row(self, row):
+        if not row or not isinstance(row, dict):
+            return {}
+        type_val = row.get('type')
+        # Defensive: skip if type_val is not a string or is None
+        if type_val is None:
+            return {}
+        type_str = str(type_val).upper()
         ynab_row = {
             'date': row.get('date', ''),
             'payee': '',
             'memo': row.get('memo', ''),
         }
-        if row.get('type', '').upper() == 'DB':
-            ynab_row['outflow'] = f"{float(row.get('amount', 0)):.2f}"
-        elif row.get('type', '').upper() == 'CR':
-            ynab_row['inflow'] = f"{float(row.get('amount', 0)):.2f}"
+        if type_str == 'DB':
+            ynab_row['outflow'] = f"{float(row.get('amount', 0) or 0):.2f}"
+        elif type_str == 'CR':
+            ynab_row['inflow'] = f"{float(row.get('amount', 0) or 0):.2f}"
         return ynab_row
 
 
 class BPDTcYNABConverter(BaseYNABConverter):
     def map_row(self, row):
+        if not row or not isinstance(row, dict):
+            return {}
+        type_val = row.get('type')
+        if type_val is None:
+            return {}
+        type_str = str(type_val).upper()
         current_year = datetime.now().year
         date = row.get('date', '')
         ynab_row = {
@@ -72,10 +98,10 @@ class BPDTcYNABConverter(BaseYNABConverter):
             'payee': '',
             'memo': row.get('memo', ''),
         }
-        if row.get('type', '').upper() == 'CR':
-            ynab_row['outflow'] = f"{float(row.get('amount', 0)):.2f}"
+        if type_str == 'CR':
+            ynab_row['outflow'] = f"{float(row.get('amount', 0) or 0):.2f}"
         else:
-            ynab_row['inflow'] = f"{float(row.get('amount', 0)):.2f}"
+            ynab_row['inflow'] = f"{float(row.get('amount', 0) or 0):.2f}"
         return ynab_row
 
 
