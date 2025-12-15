@@ -53,12 +53,14 @@ class BaseYNABConverter:
 
 class BHDYNABConverter(BaseYNABConverter):
     def map_row(self, row):
+        outflow = row.get('outflow', '').strip().replace('$', '').replace(',', '').strip()
+        inflow = row.get('inflow', '').strip().replace('$', '').replace(',', '').strip()
         return {
             'date': row.get('date', ''),
             'payee': '',
             'memo': row.get('memo', ''),
-            'outflow': abs(float(row.get('outflow', 0))) if row.get('outflow') else '',
-            'inflow': abs(float(row.get('inflow', 0))) if row.get('inflow') else ''
+            'outflow': abs(float(outflow)) if outflow else '',
+            'inflow': abs(float(inflow)) if inflow else ''
         }
 
 
