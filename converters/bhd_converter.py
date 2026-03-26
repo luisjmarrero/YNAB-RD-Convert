@@ -1,5 +1,6 @@
 import os
 import csv
+import re
 import pdfplumber
 import logging
 from collections import defaultdict
@@ -66,13 +67,39 @@ class BHDCreditCardConverter(BHDBaseConverter):
             for page in pdf.pages:
                 for table in page.extract_tables() or []:
                     for row in table:
-                        if len(row) < 7:
+                        if len(row) < 6:
                             continue
 
                         row = [cell.strip() if cell else "" for cell in row]
-                        outflow = row[5].replace(",", "").strip()
-                        inflow = row[6].replace(",", "").strip()
-                        currency = row[4]
+
+                        # Skip header rows
+                        if row[0] == "No. Autorización" or row[1] == "Fecha de Transacción":
+                            continue
+
+                        # Extract currency and amount from debit/credit columns
+                        # Format: "US$ 60.77" or "RD$ 1,800.00" or ""
+                        debit_raw = row[4]
+                        credit_raw = row[5] if len(row) > 5 else ""
+
+                        currency = ""
+                        outflow = ""
+                        inflow = ""
+
+                        amount_pattern = re.compile(r'(US|RD)\$?\s*([\d,.-]+)')
+
+                        if debit_raw:
+                            m = amount_pattern.search(debit_raw)
+                            if m:
+                                currency = m.group(1)
+                                outflow = m.group(2).replace(",", "")
+                        if credit_raw:
+                            m = amount_pattern.search(credit_raw)
+                            if m:
+                                currency = m.group(1)
+                                inflow = m.group(2).replace(",", "")
+
+                        if not currency:
+                            continue
 
                         currency_data[currency].append([
                             row[0], row[1], row[2], row[3], currency, outflow, inflow

@@ -8,6 +8,7 @@ setup(
     packages=find_packages(include=['ynab_convert_rd', 'ynab_convert_rd.*', 'converters', 'converters.*']),
     install_requires=[
         'colorlog',
+        'pdfplumber',
     ],
     entry_points={
         'console_scripts': [
