@@ -107,11 +107,32 @@ class BPDTcYNABConverter(BaseYNABConverter):
         return ynab_row
 
 
+class PervAccYNABConverter(BaseYNABConverter):
+    def map_row(self, row):
+        if not row or not isinstance(row, dict):
+            return {}
+        type_val = row.get('type')
+        if type_val is None:
+            return {}
+        type_str = str(type_val).upper()
+        ynab_row = {
+            'date': row.get('date', ''),
+            'payee': '',
+            'memo': row.get('memo', ''),
+        }
+        if type_str == 'DB':
+            ynab_row['outflow'] = f"{float(row.get('amount', 0) or 0):.2f}"
+        elif type_str == 'CR':
+            ynab_row['inflow'] = f"{float(row.get('amount', 0) or 0):.2f}"
+        return ynab_row
+
+
 class YNABFileProcessor:
     converters = {
         'bhd': BHDYNABConverter,
         'bpd acc': BPDAccYNABConverter,
         'bpd tc': BPDTcYNABConverter,
+        'perv acc': PervAccYNABConverter,
     }
 
     @staticmethod
@@ -129,6 +150,8 @@ class YNABFileProcessor:
                 converter_cls = YNABFileProcessor.converters['bpd acc']
             elif filename_lower.startswith('bpd') and 'tc' in filename_lower:
                 converter_cls = YNABFileProcessor.converters['bpd tc']
+            elif filename_lower.startswith('perv') and 'acc' in filename_lower:
+                converter_cls = YNABFileProcessor.converters['perv acc']
             else:
                 logger.info(f"[ynab_converter] Skipped unknown format: {filename}")
                 continue

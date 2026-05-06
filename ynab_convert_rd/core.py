@@ -3,6 +3,7 @@ import logging
 import colorlog
 from converters.bpd_converter import BPDFileProcessor
 from converters.bhd_converter import BHDFileProcessor
+from converters.perv_converter import PervFileProcessor
 from converters.ynab_converter import YNABFileProcessor
 
 DEFAULT_SOURCE_DIR = 'data'
@@ -52,7 +53,13 @@ def process_files(source_dir, result_dir):
                 logger.info(f"[bhd] Processing file: {file_path}")
                 BHDFileProcessor.convert_file(file_path, result_dir)
             else:
-                logger.warning(f"[skip bhd] Unsupported file prefix: {filename}")
+                logger.warning(f"[skip pdf] Unsupported file prefix: {filename}")
+        elif ext == '.csv':
+            if name.startswith('perv'):
+                logger.info(f"[perv] Processing file: {file_path}")
+                PervFileProcessor.convert_file(file_path, result_dir)
+            else:
+                logger.warning(f"[skip csv] Unsupported file prefix: {filename}")
         else:
             logger.warning(f"[skip] Unsupported file type: {filename}")
 
